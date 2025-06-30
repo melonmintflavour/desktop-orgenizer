@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/DesktopOrgUtility.dir/main.cpp.o -o DesktopOrgUtility  -lgdi32 -luser32 -ld2d1 -ldwmapi
