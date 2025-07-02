@@ -26,21 +26,23 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 namespace {
 struct qt_meta_stringdata_ZoneWidget_t {
-    uint offsetsAndSizes[28];
+    uint offsetsAndSizes[32];
     char stringdata0[11];
     char stringdata1[20];
     char stringdata2[1];
-    char stringdata3[13];
-    char stringdata4[5];
-    char stringdata5[4];
-    char stringdata6[7];
-    char stringdata7[5];
-    char stringdata8[6];
-    char stringdata9[8];
-    char stringdata10[9];
-    char stringdata11[11];
-    char stringdata12[12];
-    char stringdata13[5];
+    char stringdata3[20];
+    char stringdata4[31];
+    char stringdata5[13];
+    char stringdata6[5];
+    char stringdata7[4];
+    char stringdata8[7];
+    char stringdata9[5];
+    char stringdata10[6];
+    char stringdata11[8];
+    char stringdata12[9];
+    char stringdata13[11];
+    char stringdata14[12];
+    char stringdata15[5];
 };
 #define QT_MOC_LITERAL(ofs, len) \
     uint(sizeof(qt_meta_stringdata_ZoneWidget_t::offsetsAndSizes) + ofs), len
@@ -49,21 +51,25 @@ Q_CONSTINIT static const qt_meta_stringdata_ZoneWidget_t qt_meta_stringdata_Zone
         QT_MOC_LITERAL(0, 10),  // "ZoneWidget"
         QT_MOC_LITERAL(11, 19),  // "removeZoneRequested"
         QT_MOC_LITERAL(31, 0),  // ""
-        QT_MOC_LITERAL(32, 12),  // "ResizeRegion"
-        QT_MOC_LITERAL(45, 4),  // "None"
-        QT_MOC_LITERAL(50, 3),  // "Top"
-        QT_MOC_LITERAL(54, 6),  // "Bottom"
-        QT_MOC_LITERAL(61, 4),  // "Left"
-        QT_MOC_LITERAL(66, 5),  // "Right"
-        QT_MOC_LITERAL(72, 7),  // "TopLeft"
-        QT_MOC_LITERAL(80, 8),  // "TopRight"
-        QT_MOC_LITERAL(89, 10),  // "BottomLeft"
-        QT_MOC_LITERAL(100, 11),  // "BottomRight"
-        QT_MOC_LITERAL(112, 4)   // "Move"
+        QT_MOC_LITERAL(32, 19),  // "renameZoneRequested"
+        QT_MOC_LITERAL(52, 30),  // "changeBackgroundColorRequested"
+        QT_MOC_LITERAL(83, 12),  // "ResizeRegion"
+        QT_MOC_LITERAL(96, 4),  // "None"
+        QT_MOC_LITERAL(101, 3),  // "Top"
+        QT_MOC_LITERAL(105, 6),  // "Bottom"
+        QT_MOC_LITERAL(112, 4),  // "Left"
+        QT_MOC_LITERAL(117, 5),  // "Right"
+        QT_MOC_LITERAL(123, 7),  // "TopLeft"
+        QT_MOC_LITERAL(131, 8),  // "TopRight"
+        QT_MOC_LITERAL(140, 10),  // "BottomLeft"
+        QT_MOC_LITERAL(151, 11),  // "BottomRight"
+        QT_MOC_LITERAL(163, 4)   // "Move"
     },
     "ZoneWidget",
     "removeZoneRequested",
     "",
+    "renameZoneRequested",
+    "changeBackgroundColorRequested",
     "ResizeRegion",
     "None",
     "Top",
@@ -85,33 +91,37 @@ Q_CONSTINIT static const uint qt_meta_data_ZoneWidget[] = {
       10,       // revision
        0,       // classname
        0,    0, // classinfo
-       1,   14, // methods
+       3,   14, // methods
        0,    0, // properties
-       1,   21, // enums/sets
+       1,   35, // enums/sets
        0,    0, // constructors
        0,       // flags
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    0,   20,    2, 0x08,    1 /* Private */,
+       1,    0,   32,    2, 0x08,    1 /* Private */,
+       3,    0,   33,    2, 0x08,    2 /* Private */,
+       4,    0,   34,    2, 0x08,    3 /* Private */,
 
  // slots: parameters
     QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
 
  // enums: name, alias, flags, count, data
-       3,    3, 0x2,   10,   26,
+       5,    5, 0x2,   10,   40,
 
  // enum data: key, value
-       4, uint(ZoneWidget::ResizeRegion::None),
-       5, uint(ZoneWidget::ResizeRegion::Top),
-       6, uint(ZoneWidget::ResizeRegion::Bottom),
-       7, uint(ZoneWidget::ResizeRegion::Left),
-       8, uint(ZoneWidget::ResizeRegion::Right),
-       9, uint(ZoneWidget::ResizeRegion::TopLeft),
-      10, uint(ZoneWidget::ResizeRegion::TopRight),
-      11, uint(ZoneWidget::ResizeRegion::BottomLeft),
-      12, uint(ZoneWidget::ResizeRegion::BottomRight),
-      13, uint(ZoneWidget::ResizeRegion::Move),
+       6, uint(ZoneWidget::ResizeRegion::None),
+       7, uint(ZoneWidget::ResizeRegion::Top),
+       8, uint(ZoneWidget::ResizeRegion::Bottom),
+       9, uint(ZoneWidget::ResizeRegion::Left),
+      10, uint(ZoneWidget::ResizeRegion::Right),
+      11, uint(ZoneWidget::ResizeRegion::TopLeft),
+      12, uint(ZoneWidget::ResizeRegion::TopRight),
+      13, uint(ZoneWidget::ResizeRegion::BottomLeft),
+      14, uint(ZoneWidget::ResizeRegion::BottomRight),
+      15, uint(ZoneWidget::ResizeRegion::Move),
 
        0        // eod
 };
@@ -126,6 +136,10 @@ Q_CONSTINIT const QMetaObject ZoneWidget::staticMetaObject = { {
         // Q_OBJECT / Q_GADGET
         QtPrivate::TypeAndForceComplete<ZoneWidget, std::true_type>,
         // method 'removeZoneRequested'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'renameZoneRequested'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'changeBackgroundColorRequested'
         QtPrivate::TypeAndForceComplete<void, std::false_type>
     >,
     nullptr
@@ -138,6 +152,8 @@ void ZoneWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         (void)_t;
         switch (_id) {
         case 0: _t->removeZoneRequested(); break;
+        case 1: _t->renameZoneRequested(); break;
+        case 2: _t->changeBackgroundColorRequested(); break;
         default: ;
         }
     }
@@ -163,13 +179,13 @@ int ZoneWidget::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 1)
+        if (_id < 3)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 1;
+        _id -= 3;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 1)
+        if (_id < 3)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 1;
+        _id -= 3;
     }
     return _id;
 }

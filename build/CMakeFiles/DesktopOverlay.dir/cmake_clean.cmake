@@ -4,6 +4,8 @@ file(REMOVE_RECURSE
   "DesktopOverlay_autogen"
   "CMakeFiles/DesktopOverlay.dir/DesktopOverlay_autogen/mocs_compilation.cpp.o"
   "CMakeFiles/DesktopOverlay.dir/DesktopOverlay_autogen/mocs_compilation.cpp.o.d"
+  "CMakeFiles/DesktopOverlay.dir/src/DatabaseManager.cpp.o"
+  "CMakeFiles/DesktopOverlay.dir/src/DatabaseManager.cpp.o.d"
   "CMakeFiles/DesktopOverlay.dir/src/IconData.cpp.o"
   "CMakeFiles/DesktopOverlay.dir/src/IconData.cpp.o.d"
   "CMakeFiles/DesktopOverlay.dir/src/IconWidget.cpp.o"

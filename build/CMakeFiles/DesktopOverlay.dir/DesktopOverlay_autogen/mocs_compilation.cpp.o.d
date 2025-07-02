@@ -1,7 +1,7 @@
 CMakeFiles/DesktopOverlay.dir/DesktopOverlay_autogen/mocs_compilation.cpp.o: \
  /app/build/DesktopOverlay_autogen/mocs_compilation.cpp \
  /usr/include/stdc-predef.h \
- /app/build/DesktopOverlay_autogen/UVLADIE3JM/moc_IconWidget.cpp \
+ /app/build/DesktopOverlay_autogen/UVLADIE3JM/moc_DatabaseManager.cpp \
  /usr/include/c++/13/memory /usr/include/c++/13/bits/memoryfwd.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
@@ -116,11 +116,11 @@ CMakeFiles/DesktopOverlay.dir/DesktopOverlay_autogen/mocs_compilation.cpp.o: \
  /usr/include/c++/13/backward/auto_ptr.h \
  /usr/include/c++/13/pstl/glue_memory_defs.h \
  /usr/include/c++/13/pstl/execution_defs.h \
- /app/build/DesktopOverlay_autogen/UVLADIE3JM/../../../src/IconWidget.h \
- /usr/include/x86_64-linux-gnu/qt6/QtWidgets/QWidget \
- /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qwidget.h \
- /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qtwidgetsglobal.h \
- /usr/include/x86_64-linux-gnu/qt6/QtGui/qtguiglobal.h \
+ /app/build/DesktopOverlay_autogen/UVLADIE3JM/../../../src/DatabaseManager.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/QObject \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qobject.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qobjectdefs.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qnamespace.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qglobal.h \
  /usr/include/c++/13/cstddef /usr/include/c++/13/utility \
  /usr/include/c++/13/bits/stl_relops.h \
@@ -185,16 +185,8 @@ CMakeFiles/DesktopOverlay.dir/DesktopOverlay_autogen/mocs_compilation.cpp.o: \
  /usr/include/c++/13/tr1/riemann_zeta.tcc \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qversiontagging.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qforeach.h \
- /usr/include/x86_64-linux-gnu/qt6/QtGui/qtgui-config.h \
- /usr/include/x86_64-linux-gnu/qt6/QtGui/qtguiexports.h \
- /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qtwidgets-config.h \
- /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qtwidgetsexports.h \
- /usr/include/x86_64-linux-gnu/qt6/QtGui/qwindowdefs.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qobjectdefs.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qnamespace.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qtmetamacros.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qobjectdefs_impl.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qobject.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qstring.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qchar.h \
  /usr/include/c++/13/functional /usr/include/c++/13/bits/std_function.h \
@@ -293,6 +285,27 @@ CMakeFiles/DesktopOverlay.dir/DesktopOverlay_autogen/mocs_compilation.cpp.o: \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qbindingstorage.h \
  /usr/include/c++/13/chrono /usr/include/c++/13/bits/chrono.h \
  /usr/include/c++/13/ratio /usr/include/c++/13/ctime \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/QString \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qstring.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtSql/QSqlDatabase \
+ /usr/include/x86_64-linux-gnu/qt6/QtSql/qsqldatabase.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtSql/qtsqlglobal.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtSql/qtsql-config.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtSql/qtsqlexports.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/QList \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qlist.h \
+ /app/build/DesktopOverlay_autogen/UVLADIE3JM/moc_IconWidget.cpp \
+ /app/build/DesktopOverlay_autogen/UVLADIE3JM/../../../src/IconWidget.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtWidgets/QWidget \
+ /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qwidget.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qtwidgetsglobal.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtGui/qtguiglobal.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtGui/qtgui-config.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtGui/qtguiexports.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qtwidgets-config.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qtwidgetsexports.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtGui/qwindowdefs.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qobject.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qmargins.h \
  /usr/include/x86_64-linux-gnu/qt6/QtGui/qaction.h \
  /usr/include/x86_64-linux-gnu/qt6/QtGui/qkeysequence.h \
@@ -353,9 +366,7 @@ CMakeFiles/DesktopOverlay.dir/DesktopOverlay_autogen/mocs_compilation.cpp.o: \
  /usr/include/x86_64-linux-gnu/qt6/QtGui/QScreen \
  /usr/include/x86_64-linux-gnu/qt6/QtGui/qscreen.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/QList \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qlist.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/QObject \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qobject.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/QRect \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/qrect.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/QSize \
@@ -391,15 +402,11 @@ CMakeFiles/DesktopOverlay.dir/DesktopOverlay_autogen/mocs_compilation.cpp.o: \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/QUuid \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/quuid.h \
  /app/build/DesktopOverlay_autogen/UVLADIE3JM/../../../src/ZoneData.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/QString \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qstring.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/QRectF \
  /usr/include/x86_64-linux-gnu/qt6/QtGui/QColor \
  /usr/include/x86_64-linux-gnu/qt6/QtGui/qcolor.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/QList \
  /app/build/DesktopOverlay_autogen/UVLADIE3JM/moc_PageManager.cpp \
  /app/build/DesktopOverlay_autogen/UVLADIE3JM/../../../src/PageManager.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/QObject \
  /app/build/DesktopOverlay_autogen/UVLADIE3JM/../../../src/PageData.h \
  /app/build/DesktopOverlay_autogen/UVLADIE3JM/moc_PageTabContentWidget.cpp \
  /app/build/DesktopOverlay_autogen/UVLADIE3JM/../../../src/PageTabContentWidget.h \

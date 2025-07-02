@@ -8,7 +8,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Sql)
 
 set(PROJECT_SOURCES
     src/main.cpp
@@ -30,6 +30,17 @@ set(PROJECT_SOURCES
     src/IconWidget.cpp
     src/DatabaseManager.h
     src/DatabaseManager.cpp
+    src/WidgetHostWindow.h
+    src/WidgetHostWindow.cpp
+    src/DraggableToolbar.h
+    src/DraggableToolbar.cpp
+    src/ClockWidget.h
+    src/ClockWidget.cpp
+    src/QuickAccessPanel.h
+    src/QuickAccessPanel.cpp
+    src/TodoData.h
+    src/TodoWidget.h
+    src/TodoWidget.cpp
 )
 
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})

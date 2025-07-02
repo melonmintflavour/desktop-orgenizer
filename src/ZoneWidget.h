@@ -30,6 +30,7 @@ public:
 
     ZoneData* data() const { return m_zoneData; }
     void updateFromData(); // Update widget appearance AND icons from m_zoneData
+    void filterIcons(const QString& filterText); // New method for icon filtering
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -39,6 +40,7 @@ protected:
     void enterEvent(QEnterEvent *event) override;
     void leaveEvent(QEvent *event) override;
     void contextMenuEvent(QContextMenuEvent *event) override;
+    void mouseDoubleClickEvent(QMouseEvent *event) override; // For title editing
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dragMoveEvent(QDragMoveEvent *event) override;
     void dropEvent(QDropEvent *event) override;
@@ -46,6 +48,12 @@ protected:
 
 private slots:
     void removeZoneRequested();
+    void renameZoneRequested();
+    void changeBackgroundColorRequested();
+    void setCornerRadiusRequested();
+    void setBackgroundImageRequested();
+    void clearBackgroundImageRequested();
+    void toggleBlurBackgroundImageRequested();
 
 private:
     void updateCursorShape(const QPoint& pos);
@@ -54,11 +62,17 @@ private:
     void handleMove(const QPoint& newMousePos);
     void loadOrUpdateIcons(); // Helper to create/update IconWidgets
     IconWidget* findIconWidget(const QUuid& iconId);
+    void loadBackgroundImage(); // Helper to load/cache bg image
+    void prepareProcessedBackgroundImage(); // Applies blur if needed
 
 
     ZoneData* m_zoneData;
     PageManager* m_pageManager; // To notify of changes that need saving
     QList<IconWidget*> m_iconWidgets; // Keep track of icon widgets
+    QPixmap m_cachedBgPixmap;      // Cache for the background image
+    QString m_loadedBgImagePath;   // Path of the currently loaded m_cachedBgPixmap
+    QPixmap m_processedBgPixmap;   // Potentially blurred/tinted version for painting
+    bool m_lastBlurState;          // To detect change in blur state
 
     bool m_isResizing;
     bool m_isMoving;

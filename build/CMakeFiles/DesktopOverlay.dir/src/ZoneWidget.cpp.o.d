@@ -393,6 +393,16 @@ CMakeFiles/DesktopOverlay.dir/src/ZoneWidget.cpp.o: \
  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/QApplication \
  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qapplication.h \
  /usr/include/x86_64-linux-gnu/qt6/QtCore/QUrl \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/qurl.h /app/src/IconWidget.h \
- /usr/include/x86_64-linux-gnu/qt6/QtCore/QPointF /app/src/IconData.h \
- /app/src/PageTabContentWidget.h
+ /usr/include/x86_64-linux-gnu/qt6/QtCore/qurl.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtWidgets/QInputDialog \
+ /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qinputdialog.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qlineedit.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qframe.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtGui/qtextcursor.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtGui/qtextdocument.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtGui/qtextformat.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qdialog.h \
+ /usr/include/x86_64-linux-gnu/qt6/QtWidgets/QColorDialog \
+ /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qcolordialog.h \
+ /app/src/IconWidget.h /usr/include/x86_64-linux-gnu/qt6/QtCore/QPointF \
+ /app/src/IconData.h /app/src/PageTabContentWidget.h

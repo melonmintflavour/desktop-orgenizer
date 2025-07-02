@@ -158,13 +158,28 @@
 		"/usr/lib/x86_64-linux-gnu/cmake/Qt6Widgets/Qt6WidgetsTargets-none.cmake",
 		"/usr/lib/x86_64-linux-gnu/cmake/Qt6Widgets/Qt6WidgetsAdditionalTargetInfo.cmake",
 		"/usr/lib/x86_64-linux-gnu/cmake/Qt6Widgets/Qt6WidgetsVersionlessTargets.cmake",
-		"/usr/lib/x86_64-linux-gnu/cmake/Qt6Widgets/Qt6WidgetsMacros.cmake"
+		"/usr/lib/x86_64-linux-gnu/cmake/Qt6Widgets/Qt6WidgetsMacros.cmake",
+		"/usr/lib/x86_64-linux-gnu/cmake/Qt6Sql/Qt6SqlConfigVersion.cmake",
+		"/usr/lib/x86_64-linux-gnu/cmake/Qt6Sql/Qt6SqlConfigVersionImpl.cmake",
+		"/usr/lib/x86_64-linux-gnu/cmake/Qt6Sql/Qt6SqlConfig.cmake",
+		"/usr/share/cmake-3.28/Modules/CMakeFindDependencyMacro.cmake",
+		"/usr/lib/x86_64-linux-gnu/cmake/Qt6Sql/Qt6SqlDependencies.cmake",
+		"/usr/lib/x86_64-linux-gnu/cmake/Qt6Sql/Qt6SqlTargets.cmake",
+		"/usr/lib/x86_64-linux-gnu/cmake/Qt6Sql/Qt6SqlTargets-none.cmake",
+		"/usr/lib/x86_64-linux-gnu/cmake/Qt6Sql/Qt6SqlAdditionalTargetInfo.cmake",
+		"/usr/lib/x86_64-linux-gnu/cmake/Qt6Sql/Qt6SqlVersionlessTargets.cmake"
 	],
 	"CMAKE_SOURCE_DIR" : "/app",
 	"DEP_FILE" : "/app/build/DesktopOverlay_autogen/deps",
 	"DEP_FILE_RULE_NAME" : "DesktopOverlay_autogen/timestamp",
 	"HEADERS" :
 	[
+		[
+			"/app/src/DatabaseManager.h",
+			"MU",
+			"UVLADIE3JM/moc_DatabaseManager.cpp",
+			null
+		],
 		[ "/app/src/IconData.h", "MU", "UVLADIE3JM/moc_IconData.cpp", null ],
 		[ "/app/src/IconWidget.h", "MU", "UVLADIE3JM/moc_IconWidget.cpp", null ],
 		[ "/app/src/MainWindow.h", "MU", "UVLADIE3JM/moc_MainWindow.cpp", null ],
@@ -187,7 +202,14 @@
 	"HEADER_EXTENSIONS" : [ "h", "hh", "h++", "hm", "hpp", "hxx", "in", "txx" ],
 	"INCLUDE_DIR" : "/app/build/DesktopOverlay_autogen/include",
 	"MOC_COMPILATION_FILE" : "/app/build/DesktopOverlay_autogen/mocs_compilation.cpp",
-	"MOC_DEFINITIONS" : [ "QT_CORE_LIB", "QT_GUI_LIB", "QT_NO_DEBUG", "QT_WIDGETS_LIB" ],
+	"MOC_DEFINITIONS" :
+	[
+		"QT_CORE_LIB",
+		"QT_GUI_LIB",
+		"QT_NO_DEBUG",
+		"QT_SQL_LIB",
+		"QT_WIDGETS_LIB"
+	],
 	"MOC_DEPEND_FILTERS" :
 	[
 		[
@@ -202,6 +224,7 @@
 		"/usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++",
 		"/usr/include/x86_64-linux-gnu/qt6/QtGui",
 		"/usr/include/x86_64-linux-gnu/qt6/QtWidgets",
+		"/usr/include/x86_64-linux-gnu/qt6/QtSql",
 		"/usr/include",
 		"/usr/include/c++/13",
 		"/usr/include/x86_64-linux-gnu/c++/13",
@@ -242,6 +265,7 @@
 	"SETTINGS_FILE" : "/app/build/CMakeFiles/DesktopOverlay_autogen.dir/AutogenUsed.txt",
 	"SOURCES" :
 	[
+		[ "/app/src/DatabaseManager.cpp", "MU", null ],
 		[ "/app/src/IconData.cpp", "MU", null ],
 		[ "/app/src/IconWidget.cpp", "MU", null ],
 		[ "/app/src/MainWindow.cpp", "MU", null ],

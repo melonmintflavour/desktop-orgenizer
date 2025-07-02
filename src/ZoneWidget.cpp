@@ -9,17 +9,28 @@
 #include <QApplication> // For qApp->setOverrideCursor
 #include <QMimeData>    // For drag and drop
 #include <QUrl>         // For file paths from drop
+#include <QInputDialog> // For title editing
+#include <QColorDialog> // For color picking
+#include <QFileDialog>  // For selecting background image
+#include <QPainterPath> // For rounded rect clipping
+#include <QGraphicsBlurEffect> // For blurring image
+#include <QGraphicsScene>      // For using QGraphicsBlurEffect
+#include <QGraphicsPixmapItem> // For using QGraphicsBlurEffect
+#include <QGraphicsDropShadowEffect> // For drop shadows
 #include "IconWidget.h" // For creating IconWidgets
 #include "IconData.h"   // For creating IconData
 #include "PageTabContentWidget.h" // For qobject_cast to get parent PageData
+#include "ThemeManager.h" // For text color based on theme
 
 ZoneWidget::ZoneWidget(ZoneData* zoneData, PageManager* pageManager, QWidget *parent)
     : QWidget(parent), m_zoneData(zoneData), m_pageManager(pageManager),
-      m_isResizing(false), m_isMoving(false), m_currentResizeRegion(ResizeRegion::None)
+      m_isResizing(false), m_isMoving(false), m_currentResizeRegion(ResizeRegion::None),
+      m_lastBlurState(false) // Initialize last blur state
 {
     Q_ASSERT(m_zoneData);
     Q_ASSERT(m_pageManager);
 
+    setObjectName("ZoneWidget"); // For stylesheet targeting
     // Set initial geometry from ZoneData
     setGeometry(m_zoneData->geometry().toRect());
     setMinimumSize(50, 30); // Minimum sensible size for a zone
@@ -28,12 +39,45 @@ ZoneWidget::ZoneWidget(ZoneData* zoneData, PageManager* pageManager, QWidget *pa
     setMouseTracking(true);
     setAcceptDrops(true); // Enable drag and drop onto this widget
 
-    // Custom context menu for removing the zone
+    // Add drop shadow effect
+    QGraphicsDropShadowEffect* shadowEffect = new QGraphicsDropShadowEffect(this);
+    shadowEffect->setBlurRadius(15);
+    shadowEffect->setColor(QColor(0, 0, 0, 100)); // Semi-transparent black
+    shadowEffect->setOffset(4, 4);               // Offset to bottom-right
+    setGraphicsEffect(shadowEffect);
+
+    // Custom context menu
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, &QWidget::customContextMenuRequested, this, [this](const QPoint &pos){
         QMenu contextMenu(this);
+        QAction *renameAction = contextMenu.addAction("Rename Zone...");
+        connect(renameAction, &QAction::triggered, this, &ZoneWidget::renameZoneRequested);
+
+        QAction *bgColorAction = contextMenu.addAction("Change Background Color...");
+        connect(bgColorAction, &QAction::triggered, this, &ZoneWidget::changeBackgroundColorRequested);
+
+        QAction *cornerRadiusAction = contextMenu.addAction("Set Corner Radius...");
+        connect(cornerRadiusAction, &QAction::triggered, this, &ZoneWidget::setCornerRadiusRequested);
+
+        contextMenu.addSeparator();
+        QMenu* bgImageMenu = contextMenu.addMenu("Background Image");
+        QAction *setBgImageAction = bgImageMenu->addAction("Set Image...");
+        connect(setBgImageAction, &QAction::triggered, this, &ZoneWidget::setBackgroundImageRequested);
+
+        if (!m_zoneData->backgroundImagePath().isEmpty()) {
+            QAction *clearBgImageAction = bgImageMenu->addAction("Clear Image");
+            connect(clearBgImageAction, &QAction::triggered, this, &ZoneWidget::clearBackgroundImageRequested);
+
+            QAction *blurBgImageAction = bgImageMenu->addAction("Toggle Image Blur");
+            blurBgImageAction->setCheckable(true);
+            blurBgImageAction->setChecked(m_zoneData->blurBackgroundImage());
+            connect(blurBgImageAction, &QAction::triggered, this, &ZoneWidget::toggleBlurBackgroundImageRequested);
+        }
+
+        contextMenu.addSeparator();
         QAction *removeAction = contextMenu.addAction("Remove Zone");
         connect(removeAction, &QAction::triggered, this, &ZoneWidget::removeZoneRequested);
+
         contextMenu.exec(mapToGlobal(pos));
     });
 
@@ -64,18 +108,66 @@ void ZoneWidget::paintEvent(QPaintEvent *event)
 
     if (!m_zoneData) return;
 
-    // Background
-    painter.fillRect(rect(), m_zoneData->backgroundColor());
+    // Prepare background image if path changed or not loaded
+    if (m_loadedBgImagePath != m_zoneData->backgroundImagePath() || m_cachedBgPixmap.isNull()) {
+        loadBackgroundImage(); // This will also prepare m_processedBgPixmap
+    } else if (!m_cachedBgPixmap.isNull() &&
+               (m_processedBgPixmap.isNull() || m_cachedBgPixmap.size() != m_processedBgPixmap.size() || m_zoneData->blurBackgroundImage() != m_lastBlurState)) {
+        // Re-process if blur state changed or pixmap sizes mismatch (e.g. after resize)
+        prepareProcessedBackgroundImage();
+    }
 
-    // Border (optional, for visual clarity during development)
-    painter.setPen(QPen(Qt::gray, 1));
-    painter.drawRect(rect().adjusted(0, 0, -1, -1));
 
-    // Title
-    painter.setPen(Qt::white); // Adjust text color as needed
+    QPainterPath clipPath;
+    clipPath.addRoundedRect(rect(), m_zoneData->cornerRadius(), m_zoneData->cornerRadius());
+
+    painter.setClipPath(clipPath); // Clip drawing to the rounded rect
+
+    // Draw background color first
+    painter.fillPath(clipPath, m_zoneData->backgroundColor());
+
+    // Draw background image if available and processed
+    if (!m_processedBgPixmap.isNull()) {
+        // Scale pixmap to fill the zone rect, maintaining aspect ratio and cropping if necessary.
+        // Qt::KeepAspectRatioByExpanding will make sure it covers, then clipping handles rounded corners.
+        QPixmap scaledPixmap = m_processedBgPixmap.scaled(size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+        QPointF pixmapOrigin = QPointF((width() - scaledPixmap.width()) / 2.0, (height() - scaledPixmap.height()) / 2.0);
+        painter.drawPixmap(pixmapOrigin, scaledPixmap);
+    }
+
+    // Border
+    painter.setPen(QPen(Qt::gray, 1)); // Border color from theme or data later
+    painter.drawPath(clipPath);
+
+
+    // Title - Ensure text is drawn *after* clipping and background fill
+    painter.setClipping(false); // Disable clipping for text
+
+    // Determine text color based on effective background (image or color)
+    // This is a simple heuristic. A more robust way might involve analyzing average color under text.
+    QColor effectiveBgColor = m_zoneData->backgroundColor();
+    if (!m_processedBgPixmap.isNull()) {
+        // If there's an image, assume it might be varied. A fixed contrasting color might be better.
+        // For now, let's try a fixed color or one that contrasts with a semi-transparent overlay.
+        // Or, allow user to set title text color.
+        // As a simple approach, if image is present, use white/black based on a general assumption or theme.
+         effectiveBgColor = QColor(128,128,128); // Neutral grey to pick text color against
+    }
+    QColor textColor = (effectiveBgColor.lightnessF() < 0.5) ? Qt::white : Qt::black;
+    // If a theme is active, it might override this. For now, direct contrast.
+    // If Zone bg is very transparent, text color should contrast with what's *behind* the window.
+    // This is complex. Let's use theme-provided text color as a base, or a fixed one.
+    // The current theme sets ZoneWidget { color: ... }, let's try to use that if this is too complex.
+    // For now, stick to simple contrast with the zone's main BG color or a default if image.
+    if (!m_processedBgPixmap.isNull()) {
+        textColor = (ThemeManager::currentTheme() == ThemeManager::Theme::Dark) ? Qt::white : Qt::black;
+    } else {
+         textColor = (m_zoneData->backgroundColor().lightnessF() < 0.5) ? Qt::white : Qt::black;
+    }
+    painter.setPen(textColor);
+
     QFont font = painter.font();
     font.setPointSize(10);
-    // font.setBold(true); // Optional
     painter.setFont(font);
 
     QRectF textRect = rect().adjusted(5, 2, -5, -2); // Margins for text
@@ -121,6 +213,23 @@ void ZoneWidget::mousePressEvent(QMouseEvent *event)
         event->accept();
     } else {
         QWidget::mousePressEvent(event);
+    }
+}
+
+void ZoneWidget::filterIcons(const QString& filterText)
+{
+    qDebug() << "ZoneWidget" << (m_zoneData ? m_zoneData->title() : "N/A") << "filtering icons with text:" << filterText;
+    bool searchIsEmpty = filterText.isEmpty();
+    for (IconWidget* iconWidget : m_iconWidgets) {
+        if (iconWidget && iconWidget->data()) {
+            if (searchIsEmpty) {
+                iconWidget->setVisible(true);
+            } else {
+                bool nameMatch = iconWidget->data()->displayName().contains(filterText, Qt::CaseInsensitive);
+                bool pathMatch = iconWidget->data()->filePath().contains(filterText, Qt::CaseInsensitive);
+                iconWidget->setVisible(nameMatch || pathMatch);
+            }
+        }
     }
 }
 
@@ -342,15 +451,26 @@ void ZoneWidget::contextMenuEvent(QContextMenuEvent *event)
     QWidget::contextMenuEvent(event);
 }
 
+void ZoneWidget::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    if (!m_zoneData) return;
+
+    QRectF titleBarRect(0, 0, width(), qMin(20, height()));
+    if (titleBarRect.contains(event->position())) {
+        if (event->button() == Qt::LeftButton) {
+            renameZoneRequested(); // Call the same logic as context menu
+            event->accept();
+            return;
+        }
+    }
+    QWidget::mouseDoubleClickEvent(event);
+}
+
+
 void ZoneWidget::removeZoneRequested()
 {
     if (!m_zoneData || !m_pageManager) return;
 
-    // Find the parent PageData for this zone to correctly signal PageManager
-    // This requires iterating through pages in PageManager, or PageManager providing a way
-    // to find the parent page of a zone.
-    // For now, let's assume the ZoneWidget is on the active page for removal.
-    // This might need refinement if zones could be managed on non-active pages directly.
     PageData* parentPageData = nullptr;
     if (parentWidget() && qobject_cast<PageTabContentWidget*>(parentWidget())) {
         parentPageData = qobject_cast<PageTabContentWidget*>(parentWidget())->pageData();
@@ -359,11 +479,8 @@ void ZoneWidget::removeZoneRequested()
     if (parentPageData) {
         qDebug() << "Requesting removal of zone" << m_zoneData->title() << "ID" << m_zoneData->id() << "from page" << parentPageData->id();
         m_pageManager->removeZoneFromPage(parentPageData->id(), m_zoneData->id());
-        // The ZoneWidget itself will be deleted by its parent (PageTabContentWidget)
-        // when it receives the zoneRemovedFromPage signal.
     } else {
         qWarning() << "Cannot determine parent page for zone removal. Zone ID:" << m_zoneData->id();
-        // Fallback: try removing from active page if no direct parent found (less robust)
         PageData* activePage = m_pageManager->activePage();
         if (activePage && activePage->zoneById(m_zoneData->id())) {
              qDebug() << "Fallback: Requesting removal of zone" << m_zoneData->title() << "from active page" << activePage->id();
@@ -373,6 +490,160 @@ void ZoneWidget::removeZoneRequested()
         }
     }
 }
+
+void ZoneWidget::renameZoneRequested() {
+    if (!m_zoneData || !m_pageManager) return;
+
+    bool ok;
+    QString currentTitle = m_zoneData->title();
+    QString newTitle = QInputDialog::getText(this, "Rename Zone", "Enter new zone title:", QLineEdit::Normal, currentTitle, &ok);
+
+    if (ok && !newTitle.isEmpty() && newTitle != currentTitle) {
+        m_zoneData->setTitle(newTitle);
+        m_pageManager->updateZoneData(m_zoneData); // Notifies for save and repaint
+        update(); // Immediate repaint of this widget
+        qDebug() << "Zone ID" << m_zoneData->id() << "renamed to" << newTitle;
+    }
+}
+
+void ZoneWidget::changeBackgroundColorRequested() {
+    if (!m_zoneData || !m_pageManager) return;
+
+    QColor newColor = QColorDialog::getColor(m_zoneData->backgroundColor(), this,
+                                             "Select Zone Background Color",
+                                             QColorDialog::ShowAlphaChannel); // Allow alpha selection
+
+    if (newColor.isValid()) {
+        m_zoneData->setBackgroundColor(newColor);
+        m_pageManager->updateZoneData(m_zoneData); // Notifies for save and repaint
+        update(); // Immediate repaint of this widget
+        qDebug() << "Zone ID" << m_zoneData->id() << "background color changed to" << newColor.name(QColor::HexArgb);
+    }
+}
+
+void ZoneWidget::setCornerRadiusRequested() {
+    if (!m_zoneData || !m_pageManager) return;
+
+    bool ok;
+    int currentRadius = m_zoneData->cornerRadius();
+    int newRadius = QInputDialog::getInt(this, "Set Corner Radius", "Enter corner radius (pixels):", currentRadius, 0, 100, 1, &ok); // Min 0, Max 100, step 1
+
+    if (ok && newRadius != currentRadius) {
+        m_zoneData->setCornerRadius(newRadius);
+        m_pageManager->updateZoneData(m_zoneData);
+        update(); // Repaint for new radius
+        qDebug() << "Zone ID" << m_zoneData->id() << "corner radius set to" << newRadius;
+    }
+}
+
+void ZoneWidget::setBackgroundImageRequested() {
+    if (!m_zoneData || !m_pageManager) return;
+
+    QString filePath = QFileDialog::getOpenFileName(this, tr("Select Background Image"),
+                                                    QStandardPaths::writableLocation(QStandardPaths::PicturesLocation),
+                                                    tr("Images (*.png *.jpg *.jpeg *.bmp)"));
+    if (!filePath.isEmpty()) {
+        m_zoneData->setBackgroundImagePath(filePath);
+        m_loadedBgImagePath.clear(); // Force reload
+        m_pageManager->updateZoneData(m_zoneData);
+        update();
+        qDebug() << "Zone ID" << m_zoneData->id() << "background image set to" << filePath;
+    }
+}
+
+void ZoneWidget::clearBackgroundImageRequested() {
+    if (!m_zoneData || !m_pageManager) return;
+
+    if (!m_zoneData->backgroundImagePath().isEmpty()) {
+        m_zoneData->setBackgroundImagePath(QString()); // Clear path
+        m_zoneData->setBlurBackgroundImage(false); // Also reset blur if image is cleared
+        m_cachedBgPixmap = QPixmap(); // Clear cache
+        m_processedBgPixmap = QPixmap();
+        m_loadedBgImagePath.clear();
+        m_pageManager->updateZoneData(m_zoneData);
+        update();
+        qDebug() << "Zone ID" << m_zoneData->id() << "background image cleared.";
+    }
+}
+
+void ZoneWidget::toggleBlurBackgroundImageRequested() {
+    if (!m_zoneData || !m_pageManager || m_zoneData->backgroundImagePath().isEmpty()) return;
+
+    m_zoneData->setBlurBackgroundImage(!m_zoneData->blurBackgroundImage());
+    // No need to clear m_cachedBgPixmap, just re-process it
+    m_processedBgPixmap = QPixmap(); // Force re-processing
+    m_pageManager->updateZoneData(m_zoneData);
+    update();
+    qDebug() << "Zone ID" << m_zoneData->id() << "blur background image toggled to" << m_zoneData->blurBackgroundImage();
+}
+
+
+// --- Image Loading and Processing ---
+void ZoneWidget::loadBackgroundImage() {
+    if (!m_zoneData || m_zoneData->backgroundImagePath().isEmpty()) {
+        m_cachedBgPixmap = QPixmap();
+        m_processedBgPixmap = QPixmap();
+        m_loadedBgImagePath.clear();
+        return;
+    }
+
+    if (m_loadedBgImagePath == m_zoneData->backgroundImagePath() && !m_cachedBgPixmap.isNull()) {
+        // Already loaded and path hasn't changed
+        prepareProcessedBackgroundImage(); // Ensure processed one is up-to-date (e.g. blur state)
+        return;
+    }
+
+    QPixmap pixmap(m_zoneData->backgroundImagePath());
+    if (pixmap.isNull()) {
+        qWarning() << "Failed to load background image:" << m_zoneData->backgroundImagePath();
+        m_cachedBgPixmap = QPixmap();
+        m_processedBgPixmap = QPixmap();
+        m_loadedBgImagePath.clear();
+    } else {
+        m_cachedBgPixmap = pixmap;
+        m_loadedBgImagePath = m_zoneData->backgroundImagePath();
+        qDebug() << "Loaded background image" << m_loadedBgImagePath << "for zone" << m_zoneData->id() << "Size:" << m_cachedBgPixmap.size();
+    }
+    prepareProcessedBackgroundImage(); // Prepare initial processed version
+}
+
+void ZoneWidget::prepareProcessedBackgroundImage() {
+    if (m_cachedBgPixmap.isNull()) {
+        m_processedBgPixmap = QPixmap();
+        m_lastBlurState = m_zoneData ? m_zoneData->blurBackgroundImage() : false;
+        return;
+    }
+
+    if (m_zoneData->blurBackgroundImage()) {
+        // Simple blur: Scale down, then scale up with smooth transform
+        // This is a very basic and often not great looking blur.
+        // For a better blur, QGraphicsBlurEffect is preferred but requires a scene or more setup.
+        // Let's try a QGraphicsBlurEffect approach by rendering to an image.
+
+        QImage sourceImage = m_cachedBgPixmap.toImage().convertToFormat(QImage::Format_ARGB32_Premultiplied);
+        QGraphicsScene scene;
+        QGraphicsPixmapItem item(QPixmap::fromImage(sourceImage));
+        QGraphicsBlurEffect *blur = new QGraphicsBlurEffect;
+        blur->setBlurRadius(8); // Adjust blur radius as needed
+        item.setGraphicsEffect(blur);
+        scene.addItem(&item);
+
+        QImage resultImage(sourceImage.size(), QImage::Format_ARGB32_Premultiplied);
+        resultImage.fill(Qt::transparent);
+        QPainter p(&resultImage);
+        scene.render(&p, QRectF(), QRectF(0,0,sourceImage.width(), sourceImage.height()));
+        p.end();
+
+        m_processedBgPixmap = QPixmap::fromImage(resultImage);
+        qDebug() << "Applied blur to background image for zone" << m_zoneData->id();
+
+    } else {
+        m_processedBgPixmap = m_cachedBgPixmap; // No blur, use original cached
+    }
+    m_lastBlurState = m_zoneData->blurBackgroundImage();
+    update(); // Request repaint as processed image changed
+}
+
 
 // --- Icon Management ---
 
