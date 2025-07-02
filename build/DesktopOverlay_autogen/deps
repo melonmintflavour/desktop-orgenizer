@@ -3,6 +3,8 @@ DesktopOverlay_autogen/timestamp: \
 	/app/build/CMakeFiles/3.28.3/CMakeCXXCompiler.cmake \
 	/app/build/CMakeFiles/3.28.3/CMakeSystem.cmake \
 	/app/build/DesktopOverlay_autogen/moc_predefs.h \
+	/app/src/DatabaseManager.cpp \
+	/app/src/DatabaseManager.h \
 	/app/src/IconData.cpp \
 	/app/src/IconData.h \
 	/app/src/IconWidget.cpp \
@@ -437,6 +439,11 @@ DesktopOverlay_autogen/timestamp: \
 	/usr/include/x86_64-linux-gnu/qt6/QtGui/qtguiglobal.h \
 	/usr/include/x86_64-linux-gnu/qt6/QtGui/qtransform.h \
 	/usr/include/x86_64-linux-gnu/qt6/QtGui/qwindowdefs.h \
+	/usr/include/x86_64-linux-gnu/qt6/QtSql/QSqlDatabase \
+	/usr/include/x86_64-linux-gnu/qt6/QtSql/qsqldatabase.h \
+	/usr/include/x86_64-linux-gnu/qt6/QtSql/qtsql-config.h \
+	/usr/include/x86_64-linux-gnu/qt6/QtSql/qtsqlexports.h \
+	/usr/include/x86_64-linux-gnu/qt6/QtSql/qtsqlglobal.h \
 	/usr/include/x86_64-linux-gnu/qt6/QtWidgets/QApplication \
 	/usr/include/x86_64-linux-gnu/qt6/QtWidgets/QHBoxLayout \
 	/usr/include/x86_64-linux-gnu/qt6/QtWidgets/QMainWindow \
@@ -542,6 +549,14 @@ DesktopOverlay_autogen/timestamp: \
 	/usr/lib/x86_64-linux-gnu/cmake/Qt6GuiTools/Qt6GuiToolsTargets-none.cmake \
 	/usr/lib/x86_64-linux-gnu/cmake/Qt6GuiTools/Qt6GuiToolsTargets.cmake \
 	/usr/lib/x86_64-linux-gnu/cmake/Qt6GuiTools/Qt6GuiToolsVersionlessTargets.cmake \
+	/usr/lib/x86_64-linux-gnu/cmake/Qt6Sql/Qt6SqlAdditionalTargetInfo.cmake \
+	/usr/lib/x86_64-linux-gnu/cmake/Qt6Sql/Qt6SqlConfig.cmake \
+	/usr/lib/x86_64-linux-gnu/cmake/Qt6Sql/Qt6SqlConfigVersion.cmake \
+	/usr/lib/x86_64-linux-gnu/cmake/Qt6Sql/Qt6SqlConfigVersionImpl.cmake \
+	/usr/lib/x86_64-linux-gnu/cmake/Qt6Sql/Qt6SqlDependencies.cmake \
+	/usr/lib/x86_64-linux-gnu/cmake/Qt6Sql/Qt6SqlTargets-none.cmake \
+	/usr/lib/x86_64-linux-gnu/cmake/Qt6Sql/Qt6SqlTargets.cmake \
+	/usr/lib/x86_64-linux-gnu/cmake/Qt6Sql/Qt6SqlVersionlessTargets.cmake \
 	/usr/lib/x86_64-linux-gnu/cmake/Qt6Widgets/Qt6WidgetsAdditionalTargetInfo.cmake \
 	/usr/lib/x86_64-linux-gnu/cmake/Qt6Widgets/Qt6WidgetsConfig.cmake \
 	/usr/lib/x86_64-linux-gnu/cmake/Qt6Widgets/Qt6WidgetsConfigVersion.cmake \

@@ -4,7 +4,9 @@
 #include "ZoneData.h"
 #include "PageManager.h"
 #include <QDebug>
-#include <QVBoxLayout> // For basic layout if no zones, or for overlay controls later
+#include <QVBoxLayout>
+#include <QPainter> // For paintEvent
+#include <QPixmap>  // For wallpaper
 
 PageTabContentWidget::PageTabContentWidget(PageData* pageData, PageManager* pageManager, QWidget *parent)
     : QWidget(parent), m_pageData(pageData), m_pageManager(pageManager)
@@ -53,6 +55,72 @@ void PageTabContentWidget::loadInitialZones()
             qDebug() << "Loaded initial zone:" << zd->title() << "on page" << pageId();
         }
     }
+}
+
+void PageTabContentWidget::loadPageWallpaper() {
+    if (!m_pageData || m_pageData->wallpaperPath().isEmpty()) {
+        m_cachedWallpaper = QPixmap();
+        m_loadedWallpaperPath.clear();
+        update(); // Repaint, as wallpaper might have been cleared
+        return;
+    }
+
+    if (m_loadedWallpaperPath == m_pageData->wallpaperPath() && !m_cachedWallpaper.isNull()) {
+        // Already loaded and path hasn't changed
+        return;
+    }
+
+    QPixmap pixmap(m_pageData->wallpaperPath());
+    if (pixmap.isNull()) {
+        qWarning() << "Failed to load page wallpaper:" << m_pageData->wallpaperPath();
+        m_cachedWallpaper = QPixmap(); // Ensure it's cleared on failure
+    } else {
+        m_cachedWallpaper = pixmap;
+        qDebug() << "Loaded page wallpaper:" << m_pageData->wallpaperPath();
+    }
+    m_loadedWallpaperPath = m_pageData->wallpaperPath();
+    update(); // Repaint with new/cleared wallpaper
+}
+
+
+void PageTabContentWidget::paintEvent(QPaintEvent *event)
+{
+    Q_UNUSED(event);
+    QPainter painter(this);
+
+    if (!m_pageData) {
+        QWidget::paintEvent(event); // Default painting if no pagedata
+        return;
+    }
+
+    // 1. Check and load wallpaper if path changed
+    if (m_loadedWallpaperPath != m_pageData->wallpaperPath() ||
+        (!m_pageData->wallpaperPath().isEmpty() && m_cachedWallpaper.isNull())) {
+        loadPageWallpaper();
+    }
+
+    // 2. Draw wallpaper
+    if (!m_cachedWallpaper.isNull()) {
+        // Scale to cover, maintaining aspect ratio (Qt::KeepAspectRatioByExpanding)
+        // Then it will be clipped by the widget's bounds naturally.
+        QPixmap scaledWallpaper = m_cachedWallpaper.scaled(size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+        QPointF pixmapOrigin = QPointF((width() - scaledWallpaper.width()) / 2.0,
+                                       (height() - scaledWallpaper.height()) / 2.0);
+        painter.drawPixmap(pixmapOrigin, scaledWallpaper);
+    } else {
+        // If no wallpaper, or failed to load, some fallback background might be desired
+        // For now, if main window is transparent, this will be transparent.
+        // Or, paint a theme-based default page background if themes are extended to pages.
+        // painter.fillRect(rect(), QColor(20,20,20,200)); // Example placeholder
+    }
+
+    // 3. Draw overlay color
+    if (m_pageData->overlayColor().alpha() > 0) {
+        painter.fillRect(rect(), m_pageData->overlayColor());
+    }
+
+    // ZoneWidgets are children and will paint themselves on top.
+    // No need to call QWidget::paintEvent(event) if we've handled all background.
 }
 
 void PageTabContentWidget::handleZoneAdded(PageData* page, ZoneData* zoneData)
@@ -120,4 +188,14 @@ ZoneWidget* PageTabContentWidget::findZoneWidget(const QUuid& zoneId)
         }
     }
     return nullptr;
+}
+
+void PageTabContentWidget::filterIcons(const QString& filterText)
+{
+    qDebug() << "PageTabContentWidget for page" << pageId() << "filtering icons with text:" << filterText;
+    for (ZoneWidget* zoneWidget : m_zoneWidgets) {
+        if (zoneWidget) {
+            zoneWidget->filterIcons(filterText);
+        }
+    }
 }

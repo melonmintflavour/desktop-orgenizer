@@ -39,8 +39,9 @@ signals:
 
     // Zone signals
     void zoneAddedToPage(PageData* page, ZoneData* zone);
-    void zoneRemovedFromPage(PageData* page, QUuid zoneId); // Changed from ZoneData* to QUuid for removal signal
+    void zoneRemovedFromPage(PageData* page, QUuid zoneId);
     void zoneDataChanged(ZoneData* zone);
+    void pagePropertiesChanged(PageData* page); // For wallpaper/overlay changes
 
 public: // Zone management methods
     ZoneData* addZoneToActivePage(const QString& title, const QRectF& geometry, const QColor& backgroundColor);
@@ -51,6 +52,10 @@ public: // Zone management methods
 
     void addLoadedPage(PageData* pageData); // For DatabaseManager
     void clearAllPages();                   // For DatabaseManager
+
+    bool renamePage(const QUuid& pageId, const QString& newName);
+    void movePage(int fromIndex, int toIndex);
+    void notifyPagePropertiesChanged(PageData* page); // To signal UI refresh & save trigger
 
 
 private:

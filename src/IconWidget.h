@@ -31,7 +31,7 @@ protected:
 
 private slots:
     void removeIconRequested();
-    // void launchFileRequested(); // For later
+    void launchFileRequested();
 
 private:
     IconData* m_iconData;
@@ -40,6 +40,8 @@ private:
 
     bool m_isDragging;
     QPoint m_dragStartPosition; // Relative to widget's top-left, for dragging
+
+    static const int GRID_SIZE = 16; // Grid size for snapping
 };
 
 #endif // ICONWIDGET_H

@@ -10,9 +10,13 @@
 #include <QScreen>
 #include <QDebug>
 #include <QFileInfo> // For display name
-#include <QDesktopServices> // For launching later
+#include <QDesktopServices> // For launching
 #include <QUrl>
+#include <cmath> // For std::round
+#include <QMessageBox> // For confirmations and warnings
 
+// Definition of static const member
+// const int IconWidget::GRID_SIZE; // Not needed if it's const int inside class in C++17
 
 IconWidget::IconWidget(IconData* iconData, PageManager* pageManager, ZoneWidget *parentZoneWidget)
     : QWidget(parentZoneWidget), // Parent is the ZoneWidget
@@ -25,6 +29,7 @@ IconWidget::IconWidget(IconData* iconData, PageManager* pageManager, ZoneWidget 
     Q_ASSERT(m_pageManager);
     Q_ASSERT(m_parentZoneWidget);
 
+    setObjectName("IconWidget"); // For stylesheet targeting
     // Set initial geometry and size
     // Icons are typically small, e.g., 64x64 or 32x32 plus text
     // For now, fixed size. Will be dynamic later based on icon image and text.
@@ -38,10 +43,11 @@ IconWidget::IconWidget(IconData* iconData, PageManager* pageManager, ZoneWidget 
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, &QWidget::customContextMenuRequested, this, [this](const QPoint &pos){
         QMenu contextMenu(this);
+        QAction *launchAction = contextMenu.addAction("Open");
+        connect(launchAction, &QAction::triggered, this, &IconWidget::launchFileRequested);
+        contextMenu.addSeparator();
         QAction *removeAction = contextMenu.addAction("Remove Icon");
         connect(removeAction, &QAction::triggered, this, &IconWidget::removeIconRequested);
-        // QAction *launchAction = contextMenu.addAction("Launch"); // For later
-        // connect(launchAction, &QAction::triggered, this, &IconWidget::launchFileRequested);
         contextMenu.exec(mapToGlobal(pos));
     });
 }
@@ -124,15 +130,29 @@ void IconWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     if (m_isDragging && event->button() == Qt::LeftButton) {
         m_isDragging = false;
-        if (m_iconData) {
-            QPointF newPositionInZone = pos(); // Current position is relative to parent (ZoneWidget)
-            if (m_iconData->positionInZone() != newPositionInZone) {
-                m_iconData->setPositionInZone(newPositionInZone);
-                qDebug() << "Icon" << m_iconData->id() << "moved to" << newPositionInZone << "in zone" << m_parentZoneWidget->data()->id();
-                // Notify PageManager (via ZoneData) that data has changed
-                if (m_parentZoneWidget && m_parentZoneWidget->data()) {
+        if (m_iconData && m_parentZoneWidget) {
+            QPointF currentPos = pos(); // Current position is relative to parent (ZoneWidget)
+
+            // Snap to grid
+            qreal snappedX = std::round(currentPos.x() / static_cast<qreal>(GRID_SIZE)) * GRID_SIZE;
+            qreal snappedY = std::round(currentPos.y() / static_cast<qreal>(GRID_SIZE)) * GRID_SIZE;
+            QPointF snappedPositionInZone(snappedX, snappedY);
+
+            // Ensure snapped position is also within bounds (though dragging should already ensure this)
+            snappedPositionInZone.setX(qBound(0.0, snappedPositionInZone.x(), m_parentZoneWidget->width() - static_cast<qreal>(width())));
+            snappedPositionInZone.setY(qBound(0.0, snappedPositionInZone.y(), m_parentZoneWidget->height() - static_cast<qreal>(height())));
+
+            if (m_iconData->positionInZone() != snappedPositionInZone) {
+                m_iconData->setPositionInZone(snappedPositionInZone);
+                move(snappedPositionInZone.toPoint()); // Move widget to snapped position
+                qDebug() << "Icon" << m_iconData->id() << "snapped and moved to" << snappedPositionInZone
+                         << "in zone" << m_parentZoneWidget->data()->id();
+                if (m_parentZoneWidget->data()) {
                     m_pageManager->updateZoneData(m_parentZoneWidget->data());
                 }
+            } else if (pos() != snappedPositionInZone.toPoint()) {
+                // If data didn't change but widget position isn't snapped (e.g. initial placement), snap it.
+                move(snappedPositionInZone.toPoint());
             }
         }
         event->accept();
@@ -144,8 +164,7 @@ void IconWidget::mouseReleaseEvent(QMouseEvent *event)
 void IconWidget::mouseDoubleClickEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton && m_iconData) {
-        qDebug() << "Icon double-clicked (launch later):" << m_iconData->filePath();
-        // QDesktopServices::openUrl(QUrl::fromLocalFile(m_iconData->filePath())); // Implement launching later
+        launchFileRequested(); // Call the same action as context menu
         event->accept();
     } else {
         QWidget::mouseDoubleClickEvent(event);
@@ -165,16 +184,42 @@ void IconWidget::removeIconRequested()
 
     ZoneData* zd = m_parentZoneWidget->data();
     QUuid iconIdToRemove = m_iconData->id();
+    QString iconName = m_iconData->displayName();
 
-    qDebug() << "Requesting removal of icon" << m_iconData->displayName() << "ID" << iconIdToRemove
-             << "from zone" << zd->title() << "ID" << zd->id();
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "Confirm Remove Icon",
+                                  QString("Are you sure you want to remove icon '%1'?").arg(iconName),
+                                  QMessageBox::Yes|QMessageBox::No);
 
-    if (zd->removeIcon(iconIdToRemove)) { // This also deletes IconData from ZoneData's list
-        m_pageManager->updateZoneData(zd); // Notify that zone content changed
-        // The IconWidget itself will be deleted by ZoneWidget when it handles this change
-        // or it can be done here: this->deleteLater();
-        // For now, let ZoneWidget handle its child widget removal when it processes updateZoneData.
+    if (reply == QMessageBox::Yes) {
+        qDebug() << "Confirmed removal of icon" << iconName << "ID" << iconIdToRemove
+                 << "from zone" << zd->title() << "ID" << zd->id();
+
+        if (zd->removeIcon(iconIdToRemove)) { // This also deletes IconData from ZoneData's list
+            m_pageManager->updateZoneData(zd); // Notify that zone content changed
+            // The IconWidget is a child of ZoneWidget. ZoneWidget::loadOrUpdateIcons
+            // (triggered by updateZoneData via PageTabContentWidget) will notice this icon
+            // is gone from ZoneData and will delete the IconWidget instance.
+        } else {
+            qWarning() << "Failed to remove icon from ZoneData. Icon ID:" << iconIdToRemove;
+            QMessageBox::warning(this, "Remove Failed", "Could not remove the icon from data.");
+        }
     } else {
-        qWarning() << "Failed to remove icon from ZoneData. Icon ID:" << iconIdToRemove;
+        qDebug() << "Removal of icon" << iconName << "cancelled.";
+    }
+}
+
+void IconWidget::launchFileRequested() {
+    if (!m_iconData || m_iconData->filePath().isEmpty()) {
+        qWarning() << "No file path associated with this icon.";
+        QMessageBox::information(this, "Cannot Open", "No file path is associated with this icon.");
+        return;
+    }
+
+    qDebug() << "Attempting to launch:" << m_iconData->filePath();
+    if (!QDesktopServices::openUrl(QUrl::fromLocalFile(m_iconData->filePath()))) {
+        qWarning() << "Failed to open URL:" << m_iconData->filePath();
+        QMessageBox::warning(this, "Open Failed",
+                             QString("Could not open the file or application:\n%1\n\nPlease check if the file exists and you have the necessary permissions.").arg(m_iconData->filePath()));
     }
 }

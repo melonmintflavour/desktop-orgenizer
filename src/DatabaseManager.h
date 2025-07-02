@@ -24,6 +24,8 @@ public:
     bool loadPages(PageManager* pageManager); // Populates PageManager from DB
     bool savePages(const QList<PageData*>& pages); // Saves all pages and their contents
 
+    QString databasePath() const { return m_dbPath; }
+
 private:
     bool createTablesIfNotExist();
 

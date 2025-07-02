@@ -1,16 +1,22 @@
 #include "PageData.h"
 #include "ZoneData.h" // Required for ZoneData definition
 #include <QDebug>
+#include <QColor> // For Qt::transparent
 
-
-PageData::PageData(const QString& name) : m_id(QUuid::createUuid()), m_name(name)
+PageData::PageData(const QString& name)
+    : m_id(QUuid::createUuid()), m_name(name), m_overlayColor(Qt::transparent) // Initialize new members
 {
     qDebug() << "PageData created (new UUID):" << m_id << name;
 }
-PageData::PageData(QUuid id, const QString& name) : m_id(id), m_name(name)
+
+PageData::PageData(QUuid id, const QString& name)
+    : m_id(id), m_name(name), m_overlayColor(Qt::transparent) // Initialize new members
 {
     qDebug() << "PageData created (existing UUID):" << m_id << name;
 }
+
+// Constructor for loading from DB will be updated in DatabaseManager to pass these
+// For now, ensure existing constructors initialize them.
 
 PageData::~PageData()
 {

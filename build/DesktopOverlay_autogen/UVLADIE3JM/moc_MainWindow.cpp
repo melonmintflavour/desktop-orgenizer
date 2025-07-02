@@ -26,7 +26,7 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 namespace {
 struct qt_meta_stringdata_MainWindow_t {
-    uint offsetsAndSizes[42];
+    uint offsetsAndSizes[52];
     char stringdata0[11];
     char stringdata1[11];
     char stringdata2[1];
@@ -47,7 +47,12 @@ struct qt_meta_stringdata_MainWindow_t {
     char stringdata17[7];
     char stringdata18[22];
     char stringdata19[5];
-    char stringdata20[21];
+    char stringdata20[22];
+    char stringdata21[15];
+    char stringdata22[10];
+    char stringdata23[8];
+    char stringdata24[21];
+    char stringdata25[23];
 };
 #define QT_MOC_LITERAL(ofs, len) \
     uint(sizeof(qt_meta_stringdata_MainWindow_t::offsetsAndSizes) + ofs), len
@@ -73,7 +78,12 @@ Q_CONSTINIT static const qt_meta_stringdata_MainWindow_t qt_meta_stringdata_Main
         QT_MOC_LITERAL(249, 6),  // "zoneId"
         QT_MOC_LITERAL(256, 21),  // "handleZoneDataChanged"
         QT_MOC_LITERAL(278, 4),  // "zone"
-        QT_MOC_LITERAL(283, 20)   // "addZoneToCurrentPage"
+        QT_MOC_LITERAL(283, 21),  // "handlePageNameChanged"
+        QT_MOC_LITERAL(305, 14),  // "handleTabMoved"
+        QT_MOC_LITERAL(320, 9),  // "fromIndex"
+        QT_MOC_LITERAL(330, 7),  // "toIndex"
+        QT_MOC_LITERAL(338, 20),  // "addZoneToCurrentPage"
+        QT_MOC_LITERAL(359, 22)   // "handleTabDoubleClicked"
     },
     "MainWindow",
     "addNewPage",
@@ -95,7 +105,12 @@ Q_CONSTINIT static const qt_meta_stringdata_MainWindow_t qt_meta_stringdata_Main
     "zoneId",
     "handleZoneDataChanged",
     "zone",
-    "addZoneToCurrentPage"
+    "handlePageNameChanged",
+    "handleTabMoved",
+    "fromIndex",
+    "toIndex",
+    "addZoneToCurrentPage",
+    "handleTabDoubleClicked"
 };
 #undef QT_MOC_LITERAL
 } // unnamed namespace
@@ -106,7 +121,7 @@ Q_CONSTINIT static const uint qt_meta_data_MainWindow[] = {
       10,       // revision
        0,       // classname
        0,    0, // classinfo
-      10,   14, // methods
+      13,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -114,16 +129,19 @@ Q_CONSTINIT static const uint qt_meta_data_MainWindow[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    0,   74,    2, 0x08,    1 /* Private */,
-       3,    2,   75,    2, 0x08,    2 /* Private */,
-       7,    2,   80,    2, 0x08,    5 /* Private */,
-       8,    2,   85,    2, 0x08,    8 /* Private */,
-      11,    1,   90,    2, 0x08,   11 /* Private */,
-      12,    1,   93,    2, 0x08,   13 /* Private */,
-      13,    2,   96,    2, 0x08,   15 /* Private */,
-      16,    2,  101,    2, 0x08,   18 /* Private */,
-      18,    1,  106,    2, 0x08,   21 /* Private */,
-      20,    0,  109,    2, 0x08,   23 /* Private */,
+       1,    0,   92,    2, 0x08,    1 /* Private */,
+       3,    2,   93,    2, 0x08,    2 /* Private */,
+       7,    2,   98,    2, 0x08,    5 /* Private */,
+       8,    2,  103,    2, 0x08,    8 /* Private */,
+      11,    1,  108,    2, 0x08,   11 /* Private */,
+      12,    1,  111,    2, 0x08,   13 /* Private */,
+      13,    2,  114,    2, 0x08,   15 /* Private */,
+      16,    2,  119,    2, 0x08,   18 /* Private */,
+      18,    1,  124,    2, 0x08,   21 /* Private */,
+      20,    1,  127,    2, 0x08,   23 /* Private */,
+      21,    2,  130,    2, 0x08,   25 /* Private */,
+      24,    0,  135,    2, 0x08,   28 /* Private */,
+      25,    1,  136,    2, 0x08,   29 /* Private */,
 
  // slots: parameters
     QMetaType::Void,
@@ -135,7 +153,10 @@ Q_CONSTINIT static const uint qt_meta_data_MainWindow[] = {
     QMetaType::Void, 0x80000000 | 4, 0x80000000 | 14,    5,   15,
     QMetaType::Void, 0x80000000 | 4, QMetaType::QUuid,    5,   17,
     QMetaType::Void, 0x80000000 | 14,   19,
+    QMetaType::Void, 0x80000000 | 4,    5,
+    QMetaType::Void, QMetaType::Int, QMetaType::Int,   22,   23,
     QMetaType::Void,
+    QMetaType::Void, QMetaType::Int,    6,
 
        0        // eod
 };
@@ -180,8 +201,18 @@ Q_CONSTINIT const QMetaObject MainWindow::staticMetaObject = { {
         // method 'handleZoneDataChanged'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         QtPrivate::TypeAndForceComplete<ZoneData *, std::false_type>,
+        // method 'handlePageNameChanged'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        QtPrivate::TypeAndForceComplete<PageData *, std::false_type>,
+        // method 'handleTabMoved'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        QtPrivate::TypeAndForceComplete<int, std::false_type>,
+        QtPrivate::TypeAndForceComplete<int, std::false_type>,
         // method 'addZoneToCurrentPage'
-        QtPrivate::TypeAndForceComplete<void, std::false_type>
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'handleTabDoubleClicked'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        QtPrivate::TypeAndForceComplete<int, std::false_type>
     >,
     nullptr
 } };
@@ -201,7 +232,10 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 6: _t->handleZoneAddedToPage((*reinterpret_cast< std::add_pointer_t<PageData*>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<ZoneData*>>(_a[2]))); break;
         case 7: _t->handleZoneRemovedFromPage((*reinterpret_cast< std::add_pointer_t<PageData*>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QUuid>>(_a[2]))); break;
         case 8: _t->handleZoneDataChanged((*reinterpret_cast< std::add_pointer_t<ZoneData*>>(_a[1]))); break;
-        case 9: _t->addZoneToCurrentPage(); break;
+        case 9: _t->handlePageNameChanged((*reinterpret_cast< std::add_pointer_t<PageData*>>(_a[1]))); break;
+        case 10: _t->handleTabMoved((*reinterpret_cast< std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<int>>(_a[2]))); break;
+        case 11: _t->addZoneToCurrentPage(); break;
+        case 12: _t->handleTabDoubleClicked((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
         default: ;
         }
     }
@@ -226,13 +260,13 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 10)
+        if (_id < 13)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 10;
+        _id -= 13;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 10)
+        if (_id < 13)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 10;
+        _id -= 13;
     }
     return _id;
 }

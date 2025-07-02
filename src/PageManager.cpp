@@ -200,3 +200,86 @@ void PageManager::updateZoneData(ZoneData* zone)
         emit zoneDataChanged(zone);
     }
 }
+
+bool PageManager::renamePage(const QUuid& pageId, const QString& newName)
+{
+    PageData* pageToRename = pageById(pageId);
+    if (pageToRename) {
+        if (pageToRename->name() == newName) {
+            return true; // No change needed
+        }
+        pageToRename->setName(newName);
+        emit pageNameChanged(pageToRename);
+        qDebug() << "Page" << pageId << "renamed to" << newName;
+        return true;
+    }
+    qWarning() << "PageManager::renamePage: Page with ID" << pageId << "not found.";
+    return false;
+}
+
+void PageManager::movePage(int fromIndex, int toIndex)
+{
+    if (fromIndex < 0 || fromIndex >= m_pages.size() ||
+        toIndex < 0 || toIndex >= m_pages.size() ||
+        fromIndex == toIndex) {
+        qWarning() << "PageManager::movePage: Invalid indices provided. From:" << fromIndex << "To:" << toIndex << "Count:" << m_pages.size();
+        return;
+    }
+
+    PageData* pageToMove = m_pages.takeAt(fromIndex);
+    m_pages.insert(toIndex, pageToMove);
+
+    // Adjust active page index if it was affected by the move
+    if (m_activePageIndex == fromIndex) {
+        m_activePageIndex = toIndex;
+    } else if (fromIndex < m_activePageIndex && toIndex >= m_activePageIndex) {
+        m_activePageIndex--;
+    } else if (fromIndex > m_activePageIndex && toIndex <= m_activePageIndex) {
+        m_activePageIndex++;
+    }
+    // Note: activePageChanged signal is not emitted here as the active page *instance* hasn't changed,
+    // only its index relative to other pages. The UI (tabs) will reflect the order change directly.
+    // If other parts of the app depend on knowing the active page's *index* has changed due to reorder,
+    // then an activePageChanged or a specific pageIndexChanged signal might be needed.
+
+    emit pageOrderChanged();
+    qDebug() << "Page moved from index" << fromIndex << "to" << toIndex;
+}
+
+
+// --- PageManager internal methods for DatabaseManager ---
+void PageManager::addLoadedPage(PageData* pageData) {
+    if (pageData) {
+        m_pages.append(pageData);
+        // Emitting pageAdded here would cause MainWindow to create a new tab.
+        // This is correct behavior when loading.
+        emit pageAdded(pageData, m_pages.size() - 1);
+    }
+}
+
+void PageManager::clearAllPages() {
+    // This needs to properly delete all PageData and their owned ZoneData/IconData
+    // qDeleteAll uses the delete operator on each pointer in the container and then clears the container.
+    qDeleteAll(m_pages);
+    m_pages.clear();
+
+    int oldActiveIndex = m_activePageIndex;
+    m_activePageIndex = -1;
+
+    if (oldActiveIndex != -1) { // Only emit if it actually changed
+        emit activePageChanged(nullptr, -1);
+    }
+    // emit allPagesCleared(); // Optional signal if other components need to react to full clear
+    qDebug() << "All pages cleared from PageManager.";
+}
+
+void PageManager::notifyPagePropertiesChanged(PageData* page)
+{
+    if (page) {
+        emit pagePropertiesChanged(page);
+        // This also implies that the overall state has changed and might need saving.
+        // The main application window (MainWindow) will handle calling saveSettings on close,
+        // which iterates through all pages and saves their current state.
+        qDebug() << "Page properties changed notification for page:" << page->id();
+    }
+}

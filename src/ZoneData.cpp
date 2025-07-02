@@ -3,16 +3,22 @@
 #include <QDebug>
 
 ZoneData::ZoneData(const QString& title, const QRectF& geometry, const QColor& backgroundColor)
-    : m_id(QUuid::createUuid()), m_title(title), m_geometry(geometry), m_backgroundColor(backgroundColor)
+    : m_id(QUuid::createUuid()), m_title(title), m_geometry(geometry),
+      m_backgroundColor(backgroundColor), m_cornerRadius(0), m_blurBackgroundImage(false) // Defaults
 {
     qDebug() << "ZoneData created (new UUID):" << m_id << title;
 }
 
-ZoneData::ZoneData(QUuid id, const QString& title, const QRectF& geometry, const QColor& backgroundColor)
-    : m_id(id), m_title(title), m_geometry(geometry), m_backgroundColor(backgroundColor)
+// Main constructor used for loading from DB
+ZoneData::ZoneData(QUuid id, const QString& title, const QRectF& geometry, const QColor& backgroundColor,
+                   int cornerRadius, const QString& bgImagePath, bool blurBgImage)
+    : m_id(id), m_title(title), m_geometry(geometry),
+      m_backgroundColor(backgroundColor), m_cornerRadius(cornerRadius),
+      m_backgroundImagePath(bgImagePath), m_blurBackgroundImage(blurBgImage)
 {
-    qDebug() << "ZoneData created (existing UUID):" << m_id << title;
+    qDebug() << "ZoneData created (from DB data):" << m_id << title << "Radius:" << cornerRadius << "Img:" << bgImagePath;
 }
+
 
 ZoneData::~ZoneData()
 {

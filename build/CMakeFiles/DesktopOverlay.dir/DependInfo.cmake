@@ -10,6 +10,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "" "DesktopOverlay_autogen/timestamp" "custom" "DesktopOverlay_autogen/deps"
   "/app/build/DesktopOverlay_autogen/mocs_compilation.cpp" "CMakeFiles/DesktopOverlay.dir/DesktopOverlay_autogen/mocs_compilation.cpp.o" "gcc" "CMakeFiles/DesktopOverlay.dir/DesktopOverlay_autogen/mocs_compilation.cpp.o.d"
+  "/app/src/DatabaseManager.cpp" "CMakeFiles/DesktopOverlay.dir/src/DatabaseManager.cpp.o" "gcc" "CMakeFiles/DesktopOverlay.dir/src/DatabaseManager.cpp.o.d"
   "/app/src/IconData.cpp" "CMakeFiles/DesktopOverlay.dir/src/IconData.cpp.o" "gcc" "CMakeFiles/DesktopOverlay.dir/src/IconData.cpp.o.d"
   "/app/src/IconWidget.cpp" "CMakeFiles/DesktopOverlay.dir/src/IconWidget.cpp.o" "gcc" "CMakeFiles/DesktopOverlay.dir/src/IconWidget.cpp.o.d"
   "/app/src/MainWindow.cpp" "CMakeFiles/DesktopOverlay.dir/src/MainWindow.cpp.o" "gcc" "CMakeFiles/DesktopOverlay.dir/src/MainWindow.cpp.o.d"

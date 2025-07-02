@@ -80,7 +80,9 @@ bool DatabaseManager::createTablesIfNotExist()
     if (!query.exec("CREATE TABLE IF NOT EXISTS Pages ("
                     "page_id TEXT PRIMARY KEY NOT NULL,"
                     "page_name TEXT NOT NULL,"
-                    "page_order INTEGER NOT NULL UNIQUE" // Ensure unique order for retrieval
+                    "page_order INTEGER NOT NULL UNIQUE,"
+                    "wallpaper_path TEXT,"
+                    "overlay_color TEXT"
                     ");")) {
         qWarning() << "Failed to create Pages table:" << query.lastError().text();
         success = false;
@@ -96,6 +98,9 @@ bool DatabaseManager::createTablesIfNotExist()
                     "width REAL NOT NULL,"
                     "height REAL NOT NULL,"
                     "bg_color TEXT,"
+                    "corner_radius INTEGER DEFAULT 0,"
+                    "background_image_path TEXT,"
+                    "blur_background_image INTEGER DEFAULT 0,"
                     "FOREIGN KEY(page_id) REFERENCES Pages(page_id) ON DELETE CASCADE"
                     ");")) {
         qWarning() << "Failed to create Zones table:" << query.lastError().text();
@@ -183,11 +188,14 @@ bool DatabaseManager::savePages(const QList<PageData*>& pages)
 bool DatabaseManager::savePage(PageData* pageData, int order)
 {
     QSqlQuery query(m_database);
-    query.prepare("INSERT INTO Pages (page_id, page_name, page_order) "
-                  "VALUES (:page_id, :page_name, :page_order)");
+    query.prepare("INSERT INTO Pages (page_id, page_name, page_order, wallpaper_path, overlay_color) "
+                  "VALUES (:page_id, :page_name, :page_order, :wallpaper_path, :overlay_color)");
     query.bindValue(":page_id", pageData->id().toString());
     query.bindValue(":page_name", pageData->name());
     query.bindValue(":page_order", order);
+    query.bindValue(":wallpaper_path", pageData->wallpaperPath().isEmpty() ? QVariant(QVariant::String) : pageData->wallpaperPath());
+    query.bindValue(":overlay_color", pageData->overlayColor().isValid() ? pageData->overlayColor().name(QColor::HexArgb) : QVariant(QVariant::String));
+
 
     if (!query.exec()) {
         qWarning() << "Failed to save page" << pageData->id() << ":" << query.lastError().text();
@@ -199,8 +207,8 @@ bool DatabaseManager::savePage(PageData* pageData, int order)
 bool DatabaseManager::saveZone(ZoneData* zoneData, const QUuid& pageId)
 {
     QSqlQuery query(m_database);
-    query.prepare("INSERT INTO Zones (zone_id, page_id, zone_title, pos_x, pos_y, width, height, bg_color) "
-                  "VALUES (:zone_id, :page_id, :zone_title, :pos_x, :pos_y, :width, :height, :bg_color)");
+    query.prepare("INSERT INTO Zones (zone_id, page_id, zone_title, pos_x, pos_y, width, height, bg_color, corner_radius, background_image_path, blur_background_image) "
+                  "VALUES (:zone_id, :page_id, :zone_title, :pos_x, :pos_y, :width, :height, :bg_color, :corner_radius, :bg_image_path, :blur_bg_image)");
     query.bindValue(":zone_id", zoneData->id().toString());
     query.bindValue(":page_id", pageId.toString());
     query.bindValue(":zone_title", zoneData->title());
@@ -208,7 +216,11 @@ bool DatabaseManager::saveZone(ZoneData* zoneData, const QUuid& pageId)
     query.bindValue(":pos_y", zoneData->geometry().y());
     query.bindValue(":width", zoneData->geometry().width());
     query.bindValue(":height", zoneData->geometry().height());
-    query.bindValue(":bg_color", zoneData->backgroundColor().name(QColor::HexArgb)); // Save color as #AARRGGBB
+    query.bindValue(":bg_color", zoneData->backgroundColor().name(QColor::HexArgb));
+    query.bindValue(":corner_radius", zoneData->cornerRadius());
+    query.bindValue(":bg_image_path", zoneData->backgroundImagePath().isEmpty() ? QVariant(QVariant::String) : zoneData->backgroundImagePath()); // Store NULL if empty
+    query.bindValue(":blur_bg_image", zoneData->blurBackgroundImage() ? 1 : 0);
+
 
     if (!query.exec()) {
         qWarning() << "Failed to save zone" << zoneData->id() << ":" << query.lastError().text();
@@ -246,7 +258,7 @@ bool DatabaseManager::loadPages(PageManager* pageManager)
 
     pageManager->clearAllPages(); // Clear any existing in-memory pages before loading
 
-    QSqlQuery pageQuery("SELECT page_id, page_name FROM Pages ORDER BY page_order ASC", m_database);
+    QSqlQuery pageQuery("SELECT page_id, page_name, wallpaper_path, overlay_color FROM Pages ORDER BY page_order ASC", m_database);
     if (!pageQuery.exec()) {
         qWarning() << "Failed to load pages:" << pageQuery.lastError().text();
         return false;
@@ -256,16 +268,16 @@ bool DatabaseManager::loadPages(PageManager* pageManager)
     while (pageQuery.next()) {
         QUuid pageId = QUuid(pageQuery.value("page_id").toString());
         QString pageName = pageQuery.value("page_name").toString();
+        QString wallpaperPath = pageQuery.value("wallpaper_path").toString();
+        QColor overlayColor(pageQuery.value("overlay_color").toString()); // QColor can parse #AARRGGBB
 
-        // Create PageData (PageManager::addPage will not be used here as it auto-creates UUIDs)
-        PageData* newPageData = new PageData(pageId, pageName); // Use constructor with existing ID
-        // Manually add to PageManager's internal list and emit signal if PageManager allows this control
-        // Or, PageManager needs a method like `loadPage(PageData*)`
-        // For now, we'll directly add to a temporary list and then set it in PageManager
+        PageData* newPageData = new PageData(pageId, pageName);
+        newPageData->setWallpaperPath(wallpaperPath);
+        newPageData->setOverlayColor(overlayColor.isValid() ? overlayColor : Qt::transparent); // Ensure valid color or default
 
         // Load Zones for this page
         QSqlQuery zoneQuery(m_database);
-        zoneQuery.prepare("SELECT zone_id, zone_title, pos_x, pos_y, width, height, bg_color "
+        zoneQuery.prepare("SELECT zone_id, zone_title, pos_x, pos_y, width, height, bg_color, corner_radius, background_image_path, blur_background_image "
                           "FROM Zones WHERE page_id = :page_id");
         zoneQuery.bindValue(":page_id", pageId.toString());
         if (!zoneQuery.exec()) {
@@ -281,9 +293,12 @@ bool DatabaseManager::loadPages(PageManager* pageManager)
                            zoneQuery.value("pos_y").toReal(),
                            zoneQuery.value("width").toReal(),
                            zoneQuery.value("height").toReal());
-            QColor zoneColor(zoneQuery.value("bg_color").toString()); // From #AARRGGBB
+            QColor zoneColor(zoneQuery.value("bg_color").toString());
+            int cornerRadius = zoneQuery.value("corner_radius").toInt();
+            QString bgImagePath = zoneQuery.value("background_image_path").toString();
+            bool blurBgImage = zoneQuery.value("blur_background_image").toInt() == 1;
 
-            ZoneData* newZoneData = new ZoneData(zoneId, zoneTitle, zoneGeo, zoneColor);
+            ZoneData* newZoneData = new ZoneData(zoneId, zoneTitle, zoneGeo, zoneColor, cornerRadius, bgImagePath, blurBgImage);
 
             // Load Icons for this zone
             QSqlQuery iconQuery(m_database);
